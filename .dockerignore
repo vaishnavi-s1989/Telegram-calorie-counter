@@ -1,0 +1,82 @@
+# ============================================================
+# .dockerignore for IBM Code Engine Deployment
+# Excludes files not needed in the container image
+# ============================================================
+
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment files (secrets must be injected via Code Engine env vars)
+.env
+.env.local
+.env.*.local
+
+# Local database (use IBM Databases for PostgreSQL in production)
+*.db
+*.sqlite
+*.sqlite3
+calorie_tracker.db
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+tests/
+test_*.py
+*_test.py
+
+# Documentation (not needed in container)
+*.md
+DESIGN_DOCUMENTATION.md
+PROJECT_STRUCTURE.md
+SETUP_GUIDE.md
+DATABASE_INFO.md
+IBM_CLOUD_DEPLOYMENT.md
+
+# Setup scripts
+setup.sh
+
+# Graph outputs (generated at runtime)
+graphs/*.png
+graphs/*.jpg
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+mynotes.md

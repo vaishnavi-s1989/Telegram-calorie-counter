@@ -1,0 +1,162 @@
+# ============================================================
+# IBM Code Engine — Application Manifest
+# Telegram Calorie Tracker Bot
+#
+# Usage:
+#   ibmcloud ce application create --from-file ibm-code-engine.yaml
+#   ibmcloud ce application update --from-file ibm-code-engine.yaml
+#
+# Prerequisites:
+#   1. ibmcloud CLI + code-engine plugin installed
+#   2. Logged in: ibmcloud login --sso
+#   3. Target resource group: ibmcloud target -g <resource-group>
+#   4. Select/create a Code Engine project:
+#        ibmcloud ce project create --name calorie-tracker-project
+#        ibmcloud ce project select --name calorie-tracker-project
+#   5. Container image pushed to IBM Container Registry (ICR):
+#        ibmcloud cr image-push us.icr.io/<namespace>/calorie-tracker-bot:latest
+#   6. Registry secret created:
+#        ibmcloud ce secret create --format registry \
+#          --name icr-secret \
+#          --server us.icr.io \
+#          --username iamapikey \
+#          --password <IBM_CLOUD_API_KEY>
+# ============================================================
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  # Application name — must be unique within the Code Engine project
+  name: calorie-tracker-bot
+
+  annotations:
+    # Keep at least 1 instance running to avoid cold-start webhook delays
+    autoscaling.knative.dev/minScale: "1"
+    # Scale up to 3 instances under load
+    autoscaling.knative.dev/maxScale: "3"
+    # Scale based on concurrent HTTP requests
+    autoscaling.knative.dev/metric: "rps"
+    autoscaling.knative.dev/target: "50"
+
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "3"
+
+    spec:
+      # Pull image from IBM Container Registry
+      # Replace <namespace> with your ICR namespace
+      # (ibmcloud cr namespace-list)
+      imagePullSecrets:
+        - name: icr-secret
+
+      containers:
+        - name: calorie-tracker-bot
+          # Replace <namespace> with your ICR namespace
+          image: us.icr.io/<namespace>/calorie-tracker-bot:latest
+
+          # IBM Code Engine always routes to port 8080
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+
+          # Resource limits — adjust based on usage
+          resources:
+            requests:
+              cpu:    "250m"
+              memory: "512Mi"
+            limits:
+              cpu:    "1000m"
+              memory: "1Gi"
+
+          # --------------------------------------------------------
+          # Environment variables
+          # Sensitive values (tokens, passwords) should be stored in
+          # Code Engine secrets, not plain configmaps.
+          #
+          # Create secrets:
+          #   ibmcloud ce secret create --name bot-secrets \
+          #     --from-literal TELEGRAM_BOT_TOKEN=<token> \
+          #     --from-literal WEBHOOK_SECRET=<secret> \
+          #     --from-literal DATABASE_URL=<pg-url>
+          #
+          # Create configmap:
+          #   ibmcloud ce configmap create --name bot-config \
+          #     --from-literal APP_ENV=production \
+          #     --from-literal WEBHOOK_MODE=true \
+          #     --from-literal WEBHOOK_URL=https://<app>.<hash>.<region>.codeengine.appdomain.cloud \
+          #     --from-literal DEBUG=false \
+          #     --from-literal PORT=8080
+          # --------------------------------------------------------
+          env:
+            # --- From Secret (sensitive) ---
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bot-secrets
+                  key:  TELEGRAM_BOT_TOKEN
+
+            - name: WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: bot-secrets
+                  key:  WEBHOOK_SECRET
+
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: bot-secrets
+                  key:  DATABASE_URL
+
+            # --- From ConfigMap (non-sensitive) ---
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: bot-config
+                  key:  APP_ENV
+
+            - name: WEBHOOK_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: bot-config
+                  key:  WEBHOOK_MODE
+
+            - name: WEBHOOK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: bot-config
+                  key:  WEBHOOK_URL
+
+            - name: DEBUG
+              valueFrom:
+                configMapKeyRef:
+                  name: bot-config
+                  key:  DEBUG
+
+            - name: PORT
+              value: "8080"
+
+          # --------------------------------------------------------
+          # Probes — Code Engine uses these to determine readiness
+          # --------------------------------------------------------
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds:       30
+            timeoutSeconds:      10
+            failureThreshold:    3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds:       10
+            timeoutSeconds:      5
+            failureThreshold:    3
+
+# Made with Bob

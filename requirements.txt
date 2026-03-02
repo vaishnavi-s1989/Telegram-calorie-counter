@@ -1,0 +1,39 @@
+# ============================================================
+# Dependencies — Telegram Calorie Tracker Bot
+# Supports local development and IBM Cloud / Code Engine
+# ============================================================
+
+# ----- Telegram Bot ----------------------------------------
+python-telegram-bot[webhooks]==20.7
+
+# ----- Web Framework ---------------------------------------
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.6.0
+
+# ----- Production WSGI Server (IBM Code Engine) ------------
+# gunicorn drives uvicorn workers in the container
+gunicorn==21.2.0
+
+# ----- Database --------------------------------------------
+sqlalchemy==2.0.25
+
+# PostgreSQL adapter — used on IBM Databases for PostgreSQL
+# psycopg2-binary bundles libpq so no system lib is needed at
+# install time (the Dockerfile installs libpq-dev for the
+# non-binary build, but binary is simpler for CI/CD).
+psycopg2-binary==2.9.9
+
+# ----- Utilities -------------------------------------------
+python-dotenv==1.0.0
+requests==2.31.0
+
+# ----- Graph Generation ------------------------------------
+matplotlib==3.8.2
+pandas==2.2.0
+
+# ----- Date / Time -----------------------------------------
+python-dateutil==2.8.2
+
+# ----- HTTP client (async, used by python-telegram-bot) ----
+httpx
