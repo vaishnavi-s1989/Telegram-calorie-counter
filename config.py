@@ -98,6 +98,14 @@ class Config:
     # ------------------------------------------------------------------
     # External APIs
     # ------------------------------------------------------------------
+    # USDA FoodData Central API
+    # Get your API key from: https://fdc.nal.usda.gov/api-key-signup.html
+    USDA_API_KEY: str = os.getenv("USDA_API_KEY", "")
+    USDA_API_URL: str = os.getenv(
+        "USDA_API_URL",
+        "https://api.nal.usda.gov/fdc/v1"
+    )
+    
     OPEN_FOOD_FACTS_API_URL: str = os.getenv(
         "OPEN_FOOD_FACTS_API_URL",
         "https://world.openfoodfacts.org/api/v0"

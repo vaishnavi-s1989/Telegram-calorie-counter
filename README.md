@@ -10,7 +10,8 @@ A lightweight, conversational Telegram bot for tracking calories and macronutrie
 - 📈 Generate calorie trend graphs (coming soon)
 - 💬 Conversational interface - no app installation needed
 - 🏗️ Modular architecture with separate API and bot components
-- 🍛 Pre-loaded Indian food database
+- 🌐 **USDA FoodData Central API integration** - Access to 300,000+ foods
+- 🍛 Fallback database for Indian foods and common items
 
 ## Architecture
 
@@ -44,17 +45,30 @@ See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed architecture docum
    - Send `/newbot` and follow the instructions
    - Copy the bot token you receive
 
-4. **Configure environment variables**
+4. **Get a USDA API Key (Required)**
+   - Visit: https://fdc.nal.usda.gov/api-key-signup.html
+   - Sign up for a free API key (instant approval)
+   - You'll receive the key via email
+
+5. **Configure environment variables**
    ```bash
    cp .env.example .env
    ```
    
-   Edit `.env` and add your bot token:
+   Edit `.env` and add your credentials:
    ```
    TELEGRAM_BOT_TOKEN=your_bot_token_here
+   USDA_API_KEY=your_usda_api_key_here
    ```
 
-5. **Run the bot**
+6. **Test the USDA API integration**
+   ```bash
+   python test_usda_integration.py
+   ```
+   
+   You should see successful test results for food lookups.
+
+7. **Run the bot**
    ```bash
    python run_bot.py
    ```
@@ -64,7 +78,7 @@ See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed architecture docum
    🤖 Bot is running! Press Ctrl+C to stop.
    ```
 
-6. **Start chatting with your bot**
+8. **Start chatting with your bot**
    - Open Telegram
    - Search for your bot by username
    - Send `/start` to begin!
@@ -121,21 +135,25 @@ calorie-tracker/
 │   │   ├── bot_app.py
 │   │   └── handlers.py
 │   ├── services/             # Business logic
-│   │   ├── food_service.py
+│   │   ├── food_service.py   # Food parsing & nutrition
+│   │   ├── usda_service.py   # USDA API integration
 │   │   └── storage_service.py
 │   └── models/               # Data schemas
 │       └── schemas.py
 ├── config.py                 # Configuration
 ├── run_bot.py               # Bot entry point
 ├── run_api.py               # API entry point
+├── test_usda_integration.py # USDA API test script
 ├── requirements.txt          # Dependencies
 ├── .env.example             # Environment template
 ├── DESIGN_DOCUMENTATION.md  # Design specs
 ├── PROJECT_STRUCTURE.md     # Architecture docs
+├── USDA_API_INTEGRATION.md  # USDA API documentation
 └── README.md                # This file
 ```
 
 See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed architecture documentation.
+See [USDA_API_INTEGRATION.md](USDA_API_INTEGRATION.md) for USDA API integration details.
 
 ## Current Status
 
@@ -144,22 +162,23 @@ See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed architecture docum
 - ✅ Modular architecture (API, Bot, Services, Models)
 - ✅ All command handlers (`/start`, `/log`, `/today`, `/history`, `/graph`, `/reset`)
 - ✅ Food parsing with regex
-- ✅ Indian food database (20+ items: dosa, idli, roti, dal, etc.)
+- ✅ **USDA FoodData Central API integration** (300,000+ foods)
+- ✅ Fallback database for Indian foods (20+ items: dosa, idli, roti, dal, etc.)
 - ✅ In-memory data storage
 - ✅ REST API endpoints
 - ✅ Nutrition calculations
 - ✅ User-friendly responses
 - ✅ Error handling and logging
+- ✅ Database integration (SQLite/PostgreSQL)
+- ✅ Graph generation with matplotlib
+- ✅ Webhook mode for production deployment
 
 ### 🚧 Coming Soon
 
-- Database integration (SQLite/PostgreSQL)
-- Actual graph generation with matplotlib
-- External nutrition API integration (Open Food Facts)
-- Webhook mode for production deployment
 - Edit/delete specific entries
 - Weekly PDF reports
 - Goal tracking
+- Meal planning suggestions
 
 ## Development
 
